@@ -3,6 +3,8 @@ from sqlite3 import Error
 import os
 
 
+
+
 pastaApp=os.path.dirname(__file__)  #pega o nome do diretorio desse arquivo
 nomeBanco=pastaApp+"\\EPIS_DB.db"
 
