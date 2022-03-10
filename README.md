@@ -3,3 +3,6 @@ Um sistema de controle de EPIS(Equipamento de proteção individual) que permite
 
 REQUISITOS:
 -Manter todos os arquivos na mesma pasta, executar atraves do arquivo "EPI_UI.py"
+
+OBSERVAÇÕES:
+-Database ja vem com alguns nomes e EPIS ficticios criados com o proposito de dar maior celeridade a possíveis testes dentro do programa.
