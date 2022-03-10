@@ -2,6 +2,7 @@ from distutils import command
 from ipaddress import collapse_addresses
 from tkinter import *
 from tkinter import ttk
+from tkinter import messagebox
 import datetime
 import re
 from typing import final
@@ -55,147 +56,163 @@ def AtualizaçãoInicial():
         tv_EPIS2.insert("","end",values=(n,f))
 
 def DeletarFuncionario():
-        
-    FuncionarioDeletar=tv_Funcionarios.selection()[0]
-    FuncionarioDeletar=tv_Funcionarios.item(FuncionarioDeletar,"values")
-    FuncionarioDeletar=str(FuncionarioDeletar[0])    
-    vsql="DELETE FROM tb_Funcionarios WHERE T_NOMEFUNCIONARIO='"+FuncionarioDeletar+"'"    
-    EPI_Banco.dml(vsql)
+    try:   
+        FuncionarioDeletar=tv_Funcionarios.selection()[0]
+        FuncionarioDeletar=tv_Funcionarios.item(FuncionarioDeletar,"values")
+        FuncionarioDeletar=str(FuncionarioDeletar[0])    
+        vsql="DELETE FROM tb_Funcionarios WHERE T_NOMEFUNCIONARIO='"+FuncionarioDeletar+"'"    
+        EPI_Banco.dml(vsql)
 
-    vsql="DROP TABLE '"+FuncionarioDeletar+"'"    
-    EPI_Banco.dml(vsql)
+        vsql="DROP TABLE '"+FuncionarioDeletar+"'"    
+        EPI_Banco.dml(vsql)
+        AtualizaçãoInicial()
+        messagebox.showinfo(title="Operação bem sucedida",message="Funcionario removido do sistema")
+    except:
+        messagebox.showerror(title="Error",message="Favor selecionar um funcionario da lista para remover do sistema")
 
-    AtualizaçãoInicial()
+    
 
 def DeletarEPI():
-        
-    EPIDeletar=tv_EPIS.selection()[0]
-    EPIDeletar=tv_EPIS.item(EPIDeletar,"values")
-    EPIDeletar=str(EPIDeletar[0])
-    print(EPIDeletar)
-    vsql="DELETE FROM tb_EPI WHERE T_EQUIPAMENTO='"+EPIDeletar+"'"
-    EPI_Banco.dml(vsql)
-    AtualizaçãoInicial()
-        
+    try:   
+        EPIDeletar=tv_EPIS.selection()[0]
+        EPIDeletar=tv_EPIS.item(EPIDeletar,"values")
+        EPIDeletar=str(EPIDeletar[0])
+        print(EPIDeletar)
+        vsql="DELETE FROM tb_EPI WHERE T_EQUIPAMENTO='"+EPIDeletar+"'"
+        EPI_Banco.dml(vsql)
+        AtualizaçãoInicial()
+        messagebox.showinfo(title="Operação bem sucedida",message="EPI removido do sistema")
+    except:
+        messagebox.showerror(title="Error",message="Favor selecionar um EPI da lista para remover do sistema")
 
 def GerarRelatorio():
-    for item in tv_Relatorio.get_children():
-        tv_Relatorio.delete(item)
+    try:
 
-    EPISVencidos=[]
-    EPISValidos=[]
-    dataatual=DataRelatorio.get()
-    DataRE=re.split("/",str(dataatual))  
-   
-    res=datetime.datetime(int(DataRE[2]),int(DataRE[1]),int(DataRE[0]))
+        for item in tv_Relatorio.get_children():
+            tv_Relatorio.delete(item)
 
-
-    vsql="SELECT * FROM tb_Funcionarios"
-    consulta1=EPI_Banco.dql(vsql)
+        EPISVencidos=[]
+        EPISValidos=[]
+        dataatual=DataRelatorio.get()
+        DataRE=re.split("/",str(dataatual))  
     
+        res=datetime.datetime(int(DataRE[2]),int(DataRE[1]),int(DataRE[0]))
 
-    for x in consulta1:   
-        try:     
-            vsql="SELECT * FROM '"+str(x[0])+"'"
-            consulta2=EPI_Banco.dql(vsql)
 
-            for y in consulta2:
-                nomeepi=y[0]
-                datavencimento=y[2]
-                res2=datetime.datetime(int(datavencimento[0:4]),int(datavencimento[5:7]),int(datavencimento[8:10]))               
-               
+        vsql="SELECT * FROM tb_Funcionarios"
+        consulta1=EPI_Banco.dql(vsql)
+        
 
-                if res2>res:
-                    EPISValidos.append(nomeepi)
-                    
-                    
-                if res2<res:
-                    EPISVencidos.append(nomeepi)
-                    
+        for x in consulta1:   
+            try:     
+                vsql="SELECT * FROM '"+str(x[0])+"'"
+                consulta2=EPI_Banco.dql(vsql)
+
+                for y in consulta2:
+                    nomeepi=y[0]
+                    datavencimento=y[2]
+                    res2=datetime.datetime(int(datavencimento[0:4]),int(datavencimento[5:7]),int(datavencimento[8:10]))               
+                
+
+                    if res2>res:
+                        EPISValidos.append(nomeepi)
+                        
+                        
+                    if res2<res:
+                        EPISVencidos.append(nomeepi)
+                        
+                        
                     
                 
-            
-        except:
-            print()
-        finally:
-            tv_Relatorio.insert("","end",values=(x[0],x[1],EPISValidos,EPISVencidos))
-            EPISValidos.clear()
-            EPISVencidos.clear()
-
+            except:
+                print()
+            finally:
+                tv_Relatorio.insert("","end",values=(x[0],x[1],EPISValidos,EPISVencidos))
+                EPISValidos.clear()
+                EPISVencidos.clear()
+    except:
+        messagebox.showerror(title="Error",message="Favor informar uma data valida")
 
 def EntregarEPI():
-    FuncionarioSelecionado=tv_Funcionarios2.selection()[0]
-    Valores=tv_Funcionarios2.item(FuncionarioSelecionado,"values")
-    NomeEntregar=Valores[0]
+    try:
+        FuncionarioSelecionado=tv_Funcionarios2.selection()[0]
+        Valores=tv_Funcionarios2.item(FuncionarioSelecionado,"values")
+        NomeEntregar=Valores[0]
 
-    vsql="CREATE TABLE '"+NomeEntregar+"'(EPINOME VARCHAR PRIMARY KEY, DATAENTREGUE INTEGER(30), DATAVENCIMENTO INTEGER (30));"
-    EPI_Banco.dml(vsql)
-
-    EPISelecionados=tv_EPIS2.selection()
-    for x in EPISelecionados:
-        Valores=tv_EPIS2.item(x,"values")
-        n=Valores[0]
-        
-        vsql="SELECT * FROM tb_EPI WHERE T_EQUIPAMENTO='"+n+"'"
-        validadeEPI=EPI_Banco.dql(vsql)[0][1]        
-        DataRE=re.split("/",str(DataEntrega.get()))    
-   
-        res=datetime.datetime(int(DataRE[2]),int(DataRE[1]),int(DataRE[0]))        
-    
-        DataValidade=res + datetime.timedelta(days=(validadeEPI))
-        
-
-
-        vsql="INSERT INTO '"+NomeEntregar+"' (EPINOME, DATAENTREGUE, DATAVENCIMENTO) VALUES ('"+n+"','"+DataEntrega.get()+"', '"+str(DataValidade)+"')"
+        vsql="CREATE TABLE '"+NomeEntregar+"'(EPINOME VARCHAR PRIMARY KEY, DATAENTREGUE INTEGER(30), DATAVENCIMENTO INTEGER (30));"
         EPI_Banco.dml(vsql)
+
+        EPISelecionados=tv_EPIS2.selection()
+        for x in EPISelecionados:
+            Valores=tv_EPIS2.item(x,"values")
+            n=Valores[0]
+            
+            vsql="SELECT * FROM tb_EPI WHERE T_EQUIPAMENTO='"+n+"'"
+            validadeEPI=EPI_Banco.dql(vsql)[0][1]        
+            DataRE=re.split("/",str(DataEntrega.get()))    
+    
+            res=datetime.datetime(int(DataRE[2]),int(DataRE[1]),int(DataRE[0]))        
+        
+            DataValidade=res + datetime.timedelta(days=(validadeEPI))
+            
+
+
+            vsql="INSERT INTO '"+NomeEntregar+"' (EPINOME, DATAENTREGUE, DATAVENCIMENTO) VALUES ('"+n+"','"+DataEntrega.get()+"', '"+str(DataValidade)+"')"
+            EPI_Banco.dml(vsql)
+    except:
+        messagebox.showerror(title="Error",message="Favor informar uma data valida")
     
         
 
 
 def AtualizarFuncionarios():
-    for item in tv_Funcionarios.get_children():
-        tv_Funcionarios.delete(item)
+    try:
+        for item in tv_Funcionarios.get_children():
+            tv_Funcionarios.delete(item)
 
-    EPI_Funcionario.CriarFuncionario(NovoNome.get(),NovaFunção.get())
-    vsql="SELECT * FROM tb_Funcionarios"
-    consulta=EPI_Banco.dql(vsql)
-    
-    for (n,f) in consulta:
-        tv_Funcionarios.insert("","end",values=(n,f))
+        EPI_Funcionario.CriarFuncionario(NovoNome.get(),NovaFunção.get())
+        vsql="SELECT * FROM tb_Funcionarios"
+        consulta=EPI_Banco.dql(vsql)
+        
+        for (n,f) in consulta:
+            tv_Funcionarios.insert("","end",values=(n,f))
 
-    #------
-    for item in tv_Funcionarios2.get_children():
-        tv_Funcionarios2.delete(item)
+        #------
+        for item in tv_Funcionarios2.get_children():
+            tv_Funcionarios2.delete(item)
 
-    EPI_Funcionario.CriarFuncionario(NovoNome.get(),NovaFunção.get())
-    vsql="SELECT * FROM tb_Funcionarios"
-    consulta=EPI_Banco.dql(vsql)
-    
-    for (n,f) in consulta:
-        tv_Funcionarios2.insert("","end",values=(n,f))
-
+        EPI_Funcionario.CriarFuncionario(NovoNome.get(),NovaFunção.get())
+        vsql="SELECT * FROM tb_Funcionarios"
+        consulta=EPI_Banco.dql(vsql)
+        
+        for (n,f) in consulta:
+            tv_Funcionarios2.insert("","end",values=(n,f))
+    except:
+        messagebox.showerror(title="Error",message="Favor informar nome e função")
 def AtualizarEPIS():
-    for item in tv_EPIS.get_children():
-        tv_EPIS.delete(item)
+    try:
+        for item in tv_EPIS.get_children():
+            tv_EPIS.delete(item)
 
-    EPI_Equipamento.CriarNovoEPI(VNome1.get(),VDias1.get())
-    vsql="SELECT * FROM tb_EPI"
-    consulta=EPI_Banco.dql(vsql)
-    
-    for (n,f) in consulta:
-        tv_EPIS.insert("","end",values=(n,f))
+        EPI_Equipamento.CriarNovoEPI(VNome1.get(),VDias1.get())
+        vsql="SELECT * FROM tb_EPI"
+        consulta=EPI_Banco.dql(vsql)
+        
+        for (n,f) in consulta:
+            tv_EPIS.insert("","end",values=(n,f))
 
-    #-------
-    for item in tv_EPIS2.get_children():
-        tv_EPIS2.delete(item)
+        #-------
+        for item in tv_EPIS2.get_children():
+            tv_EPIS2.delete(item)
 
-    """EPI_Equipamento.CriarNovoEPI(VNome1.get(),VDias1.get())
-    vsql="SELECT * FROM tb_EPI"
-    consulta=EPI_Banco.dql(vsql)"""
-    
-    for (n,f) in consulta:
-        tv_EPIS2.insert("","end",values=(n,f))
-
+        """EPI_Equipamento.CriarNovoEPI(VNome1.get(),VDias1.get())
+        vsql="SELECT * FROM tb_EPI"
+        consulta=EPI_Banco.dql(vsql)"""
+        
+        for (n,f) in consulta:
+            tv_EPIS2.insert("","end",values=(n,f))
+    except:
+        messagebox.showerror(title="Error",message="Favor informar nome e validade")
    
 
 

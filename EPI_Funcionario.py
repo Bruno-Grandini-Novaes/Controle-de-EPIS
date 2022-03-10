@@ -3,6 +3,7 @@ import EPI_Banco
 #from EPI_UI import tv_Funcionarios          #abrindo duas janelas
 from EPI_Equipamento import EPI
 
+
 class Funcionario:
     Nome=""
     Função=""
