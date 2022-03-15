@@ -85,6 +85,9 @@ def DeletarEPI():
     except:
         messagebox.showerror(title="Error",message="Favor selecionar um EPI da lista para remover do sistema")
 
+def GerarRelatorioFuturo():
+    print()
+
 def GerarRelatorio():
     try:
 
@@ -130,6 +133,7 @@ def GerarRelatorio():
                 tv_Relatorio.insert("","end",values=(x[0],x[1],EPISValidos,EPISVencidos))
                 EPISValidos.clear()
                 EPISVencidos.clear()
+                GerarRelatorioFuturo()
     except:
         messagebox.showerror(title="Error",message="Favor informar uma data valida")
 
@@ -353,7 +357,7 @@ EntryData.grid(column=2,row=3)
 #Relatorio
 DataRelatorio=StringVar()
 
-RelatorioTitulo=Label(Tb_Relatorio,text="Relatorio de Funcionarios:")
+RelatorioTitulo=Label(Tb_Relatorio,text="Relatorio de Funcionarios na data de simulação atual:")
 l_DataRelatorio=Label(Tb_Relatorio,text="Digite a data de simulação do relatorio(ex:10/01/2022):")
 
 e_DataRelatorio=Entry(Tb_Relatorio,textvariable=DataRelatorio)
@@ -376,6 +380,25 @@ l_DataRelatorio.grid(column=2,row=2)
 e_DataRelatorio.grid(column=2,row=3)
 btn_relatorio.grid(column=2,row=4,columnspan=2)
 
+#Relatorio Futuro
+RelatorioFuturoTitulo=Label(Tb_Relatorio,text="Relatorio de Funcionarios futuro para planejamento de compras no proximo mês:")
+DataFuturaTexto=Label(Tb_Relatorio,text="Data futura em simulação: ")
+DataFuturaData=Label(Tb_Relatorio,text="")
+
+tv_RelatorioFuturo=ttk.Treeview(Tb_Relatorio,columns=('nome','função','epiaprovado','epireprovado'),show='headings')
+tv_RelatorioFuturo.column('nome',minwidth=0,width=100)
+tv_RelatorioFuturo.column('função',minwidth=0,width=100)
+tv_RelatorioFuturo.column('epiaprovado',minwidth=0,width=300)
+tv_RelatorioFuturo.column('epireprovado',minwidth=0,width=300)
+tv_RelatorioFuturo.heading('nome',text="Nome:")
+tv_RelatorioFuturo.heading('função',text="Função:")
+tv_RelatorioFuturo.heading('epiaprovado',text="EPIs Validos:")
+tv_RelatorioFuturo.heading('epireprovado',text="EPIs Vencidos:")
+
+RelatorioFuturoTitulo.grid(column=2,row=5)
+DataFuturaTexto.grid(column=2,row=6)
+DataFuturaData.grid(column=2,row=7)
+tv_RelatorioFuturo.grid(column=2,row=8)
 
 
 AtualizaçãoInicial()
