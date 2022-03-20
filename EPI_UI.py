@@ -86,7 +86,53 @@ def DeletarEPI():
         messagebox.showerror(title="Error",message="Favor selecionar um EPI da lista para remover do sistema")
 
 def GerarRelatorioFuturo():
-    print()
+    try:
+
+        for item in tv_RelatorioFuturo.get_children():
+            tv_RelatorioFuturo.delete(item)
+
+        EPISVencidosFuturo=[]
+        EPISValidosFuturo=[]
+        dataatual=DataRelatorio.get()
+        DataRE=re.split("/",str(dataatual))  
+    
+        res=datetime.datetime(int(DataRE[2]),int(DataRE[1]),int(DataRE[0]))
+        res += datetime.timedelta(days=30)
+
+        vsql="SELECT * FROM tb_Funcionarios"
+        consulta1=EPI_Banco.dql(vsql)
+        
+
+        for x in consulta1:   
+            try:     
+                vsql="SELECT * FROM '"+str(x[0])+"'"
+                consulta2=EPI_Banco.dql(vsql)
+
+                for y in consulta2:
+                    nomeepi=y[0]
+                    datavencimento=y[2]
+                    res2=datetime.datetime(int(datavencimento[0:4]),int(datavencimento[5:7]),int(datavencimento[8:10]))               
+                
+
+                    if res2>res:
+                        EPISValidosFuturo.append(nomeepi)
+                        
+                        
+                    if res2<res:
+                        EPISVencidosFuturo.append(nomeepi)
+                        
+                        
+                    
+                
+            except:
+                print()
+            finally:
+                tv_RelatorioFuturo.insert("","end",values=(x[0],x[1],EPISValidosFuturo,EPISVencidosFuturo))
+                EPISValidosFuturo.clear()
+                EPISVencidosFuturo.clear()
+                DataFuturaData.config(text=res)
+    except:
+        messagebox.showerror(title="Error",message="Favor informar uma data valida")
 
 def GerarRelatorio():
     try:
